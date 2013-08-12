@@ -23,7 +23,7 @@ Copyright 2009 Dan Weatherford, Facebook inc
 #include <wctype.h>
 #endif
 #include <stdexcept>
-
+#include <sstream>
 #include <boost/scoped_array.hpp>
 #include "precompiled_headers.h" // On windows, everything above this line in PCH
 
@@ -35,13 +35,13 @@ Copyright 2009 Dan Weatherford, Facebook inc
 namespace FB {
 
     std::string wstring_to_utf8(const std::wstring& src) {
-        std::string out_str;
+        std::stringstream out_str;
 #ifdef _WIN32
-        utf8::utf16to8(src.begin(), src.end(), std::back_inserter(out_str));
+        utf8::utf16to8(src.begin(), src.end(), &out_str);
 #else
         utf8::utf32to8(src.begin(), src.end(), std::back_inserter(out_str));
 #endif
-        return out_str;
+        return out_str.str();
     }
 
 

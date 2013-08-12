@@ -230,6 +230,33 @@ namespace utf8
         return result;
     }
 
+	template <typename u16bit_iterator>
+    std::stringstream* utf16to8 (u16bit_iterator start, u16bit_iterator end, std::stringstream* result)
+    {
+        while (start != end) {
+            uint32_t cp = internal::mask16(*start++);
+            // Take care of surrogate pairs first
+            if (internal::is_lead_surrogate(cp)) {
+                if (start != end) {
+                    uint32_t trail_surrogate = internal::mask16(*start++);
+                    if (internal::is_trail_surrogate(trail_surrogate))
+                        cp = (cp << 10) + trail_surrogate + internal::SURROGATE_OFFSET;
+                    else
+                        throw invalid_utf16(static_cast<uint16_t>(trail_surrogate));
+                }
+                else
+                    throw invalid_utf16(static_cast<uint16_t>(cp));
+
+            }
+            // Lone trail surrogate
+            else if (internal::is_trail_surrogate(cp))
+                throw invalid_utf16(static_cast<uint16_t>(cp));
+
+			result->put ( cp );
+        }
+        return result;
+    }
+
     template <typename u16bit_iterator, typename octet_iterator>
     u16bit_iterator utf8to16 (octet_iterator start, octet_iterator end, u16bit_iterator result)
     {
